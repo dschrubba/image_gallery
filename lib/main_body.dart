@@ -14,8 +14,8 @@ class MainBody extends StatelessWidget {
       controller: pageController,
       onPageChanged: onPageChanged,
       children: [
-      ScreenGallery(),
-      ScreenAbout()
-    ],);
+        ScreenGallery(),
+        ScreenAbout()
+      ],);
   }
 }

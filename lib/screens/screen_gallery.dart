@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_gallery/widgets/gallery_grid.dart';
 
 class ScreenGallery extends StatefulWidget {
   const ScreenGallery({super.key});
@@ -10,6 +11,7 @@ class ScreenGallery extends StatefulWidget {
 class _ScreenGalleryState extends State<ScreenGallery> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const GalleryGrid();
+    }
+    
   }
-}
