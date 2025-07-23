@@ -38,12 +38,33 @@ class GalleryGridData{
     }
     return null;
   }
+  Route getAltRouteForIndex(BuildContext context, int index, int prevIndex) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => GalleryGridSingleImage(
+        gridIndex: index,
+        assetUrl: _galleryGridImageData[index].assetUrl,
+        galleryGridData: this,
+      ),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      Offset begin = Offset((prevIndex > index) ? -1.0 : 1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    });
+  }
   MaterialPageRoute getRouteForIndex(BuildContext context, int index) {
-    return MaterialPageRoute(builder: (context) => GalleryGridSingleImage(
-      gridIndex: index,
-      assetUrl: _galleryGridImageData[index].assetUrl,
-      galleryGridData: this,
-      )
+    return MaterialPageRoute<GalleryGridSingleImage>(
+      builder: (context) => GalleryGridSingleImage(
+        gridIndex: index,
+        assetUrl: _galleryGridImageData[index].assetUrl,
+        galleryGridData: this,
+        )
     );
   }
   bool pushRouteForIndex(BuildContext context, int index) {

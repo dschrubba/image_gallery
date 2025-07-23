@@ -44,9 +44,10 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
         // Get MaterialPageRoute from Grid Data
         Navigator.pushReplacement(
           context,
-          widget.galleryGridData.getRouteForIndex(
+          widget.galleryGridData.getAltRouteForIndex(
             context,
             widget.gridIndex - 1,
+            widget.gridIndex
           ),
         );
       }
@@ -59,9 +60,10 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
         // Get MaterialPageRoute from Grid Data
         Navigator.pushReplacement(
           context,
-          widget.galleryGridData.getRouteForIndex(
+          widget.galleryGridData.getAltRouteForIndex(
             context,
             widget.gridIndex + 1,
+            widget.gridIndex
           ),
         );
       }
