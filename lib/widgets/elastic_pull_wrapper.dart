@@ -51,7 +51,7 @@ class _ElasticPullWrapperState extends State<ElasticPullWrapper> with SingleTick
   void _handlePanUpdate(DragUpdateDetails details) {
     setState(() {
       Offset delta = _offset + details.delta * widget.deltaFactor;
-      double dx = (delta.dx.abs() > delta.dy.abs()) ? delta.dx.clamp(-widget.maxOffset, widget.maxOffset) : 0;
+      double dx = (delta.dx.abs() > delta.dy) ? delta.dx.clamp(-widget.maxOffset, widget.maxOffset) : 0;
       double dy = (delta.dy.abs() > delta.dx.abs()) ? delta.dy.clamp(-widget.maxOffset, widget.maxOffset) : 0;
       _offset = Offset(dx, dy);
     });

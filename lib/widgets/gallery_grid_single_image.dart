@@ -1,8 +1,11 @@
+import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_gallery/app_themes.dart';
 import 'package:image_gallery/widgets/elastic_pull_wrapper.dart';
 import 'package:image_gallery/widgets/gallery_grid_data.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 
 class GalleryGridSingleImage extends StatefulWidget {
   final int gridIndex;
@@ -21,14 +24,12 @@ class GalleryGridSingleImage extends StatefulWidget {
 }
 
 class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
-  double deltaTravelX = 0;
-  double deltaTravelY = 0;
+  var _photoViewController = PhotoViewController();
   var _imageFit = BoxFit.contain;
+  var _appBarTitle = "";
 
-  changeImageFit(BoxFit fit) {
-    setState(() {
-      _imageFit = fit;
-    });
+  toggleImageFit() {
+
   }
 
   close(BuildContext context) {
@@ -76,48 +77,85 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
     }
   }
 
+  onPanUpdate(DragUpdateDetails d) {
+    log(d.globalPosition.distance.toString());
+  }
+
+  onPageChanged(int index) {
+    setState(() {
+      _appBarTitle = widget.galleryGridData.getImageAt(index)?.assetUrl.toString() ?? "";
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: darkMush,
-        title: Text(widget.assetUrl, overflow: TextOverflow.ellipsis),
+        title: Text(
+          _appBarTitle,
+          overflow: TextOverflow.ellipsis),
         actions: [
           IconButton.filled(
-            onPressed: changeImageFit(BoxFit.cover),
-            icon: Icon(Icons.zoom_in),
+            onPressed: toggleImageFit,
+            icon: Icon(Icons.fullscreen),
           ),
         ],
       ),
       body: SafeArea(
-        child: SizedBox.expand(
-          child: ElasticPullWrapper(
-            maxOffset: 100,
-            deltaFactor: 0.2,
-            threshold: 30,
-            onThresholdExceeded: onThresholdExceeded,
-            child: Stack(
-              children: [
-                OverflowBox(
-                  maxWidth: MediaQuery.sizeOf(context).width * 2,
-                  maxHeight: MediaQuery.sizeOf(context).height * 2,
-                  child: ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 48, sigmaY: 48),
+        child: PageView.builder(
+          onPageChanged: onPageChanged,
+          itemCount: widget.galleryGridData.data.length,
+          itemBuilder: (context, index) => SizedBox.expand(
+            child: ClipRect(
+              child: Stack(
+                children: [
+                  ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 64, sigmaY: 64, tileMode: TileMode.mirror),
+                    child: Image.asset(
+                      widget.galleryGridData.getImageAt(index)!.assetUrl,
+                      height: double.maxFinite,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      backgroundBlendMode: BlendMode.multiply,
+                      color: darkMush.withAlpha(128)
+                    ),
+                  ),
+                  Container(
+                    alignment: AlignmentGeometry.directional(0, 0),
+                    child: PhotoView(
+                      minScale: 1.0,
+                      maxScale: 4.0,
+                      controller: _photoViewController,
+                      backgroundDecoration: BoxDecoration(
+                        color: Colors.transparent,
+                      ),
+                      imageProvider: Image.asset(
+                        widget.galleryGridData.getImageAt(index)!.assetUrl,
+                      ).image,
+                    ),
+                  ),
+                  /*
+              ElasticPullWrapper(
+                maxOffset: 100,
+                deltaFactor: 0.2,
+                threshold: 15,
+                onThresholdExceeded: onThresholdExceeded,
+                child: Container(
+                  alignment: AlignmentGeometry.directional(0, 0),
                     child: Image.asset(
                       widget.assetUrl,
                       height: double.maxFinite,
-                      fit: BoxFit.fill,
+                      fit: _imageFit,
                     ),
-                  ),
                 ),
-                Center(
-                  child: Image.asset(
-                    widget.assetUrl,
-                    fit: _imageFit,
-                    alignment: AlignmentGeometry.xy(-1.0, 0),
-                  ),
-                ),
-              ],
+              ),
+              */
+                ],
+              ),
             ),
           ),
         ),
