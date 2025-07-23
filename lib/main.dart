@@ -12,8 +12,7 @@ class AppHome extends StatelessWidget {
   AppHome({super.key});
 
   final PageController _pageController = PageController(initialPage: 0);
-
-  GlobalKey navBarKey = GlobalKey<MainNavbarState>();
+  final GlobalKey navBarKey = GlobalKey<MainNavbarState>();
 
   void changePage(int index) {
     _pageController.animateToPage(

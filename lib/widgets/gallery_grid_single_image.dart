@@ -1,18 +1,26 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:image_gallery/app_themes.dart';
+import 'package:image_gallery/widgets/gallery_grid_data.dart';
 
 class GalleryGridSingleImage extends StatefulWidget {
+  final int gridIndex;
   final String assetUrl;
-  const GalleryGridSingleImage({super.key, required this.assetUrl});
+  final GalleryGridData galleryGridData;
+
+  const GalleryGridSingleImage({
+    super.key,
+    required this.gridIndex,
+    required this.assetUrl,
+    required this.galleryGridData,
+  });
 
   @override
   State<GalleryGridSingleImage> createState() => _GalleryGridSingleImageState();
 }
 
 class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
-
+  double deltaTravelX = 0;
   var _imageFit = BoxFit.contain;
 
   changeImageFit(BoxFit fit) {
@@ -25,17 +33,61 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
     Navigator.pop(context);
   }
 
+  onHorizontalDragUpdate(DragUpdateDetails d) {
+    double deltaX = d.delta.dx;
+    deltaTravelX += deltaX;
+    // If accumulated deltaX reached 100+
+    // This is a swipe-right
+    if (deltaTravelX > 100) {
+      // Check if next image exists
+      if (widget.galleryGridData.checkIndex(widget.gridIndex - 1)) {
+        // Get MaterialPageRoute from Grid Data
+        Navigator.pushReplacement(
+          context,
+          widget.galleryGridData.getRouteForIndex(
+            context,
+            widget.gridIndex - 1,
+          ),
+        );
+      }
+    }
+    // If accumulated deltaX reached 100+
+    // This is a swipe-left
+    else if (deltaTravelX < -100) {
+      // Check if next image exists
+      if (widget.galleryGridData.checkIndex(widget.gridIndex + 1)) {
+        // Get MaterialPageRoute from Grid Data
+        Navigator.pushReplacement(
+          context,
+          widget.galleryGridData.getRouteForIndex(
+            context,
+            widget.gridIndex + 1,
+          ),
+        );
+      }
+    }
+  }
+
+  onHorizontalDragEnd(DragEndDetails d) {
+    deltaTravelX = 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: darkMush,
         actions: [
-          IconButton.filled(onPressed: changeImageFit(BoxFit.cover), icon: Icon(Icons.zoom_in)),
+          IconButton.filled(
+            onPressed: changeImageFit(BoxFit.cover),
+            icon: Icon(Icons.zoom_in),
+          ),
         ],
       ),
       body: SafeArea(
         child: GestureDetector(
+          onHorizontalDragUpdate: onHorizontalDragUpdate,
+          onHorizontalDragEnd: onHorizontalDragEnd,
           child: SizedBox.expand(
             child: Stack(
               children: [
@@ -52,7 +104,7 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
                     ),
                   ),
                 ),
-                Center(child: Image.asset(widget.assetUrl, fit: _imageFit,)),
+                Center(child: Image.asset(widget.assetUrl, fit: _imageFit)),
               ],
             ),
           ),

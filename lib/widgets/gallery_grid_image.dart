@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:image_gallery/widgets/gallery_grid_single_image.dart';
+import 'package:image_gallery/widgets/gallery_grid_data.dart';
 
 class GalleryGridImage extends StatefulWidget {
-  final String assetUrl;
-  const GalleryGridImage({super.key, required this.assetUrl});
+  final int     gridIndex;
+  final String  assetUrl;
+  final GalleryGridData galleryGridData;
+  const GalleryGridImage({super.key, required this.gridIndex, required this.assetUrl, required this.galleryGridData});
 
   @override
   State<GalleryGridImage> createState() => _GalleryGridImageState();
 }
 
-void onImageTap(BuildContext context, String assetUrl) {
+void onImageTap(BuildContext context, int targetIndex, GalleryGridData galleryGridData) {
   Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => GalleryGridSingleImage(assetUrl: assetUrl)),
+    galleryGridData.getRouteForIndex(context, targetIndex)
   );
 }
 
@@ -22,8 +24,14 @@ class _GalleryGridImageState extends State<GalleryGridImage> {
     return ClipRRect(
       borderRadius: BorderRadiusGeometry.circular(16),
       child: GestureDetector(
-        onTap: () => onImageTap(context, widget.assetUrl),
-        child: Image.asset(widget.assetUrl, fit: BoxFit.cover),
+        onTap: () => onImageTap(
+          context,
+          widget.gridIndex,
+          widget.galleryGridData
+          ),
+        child: Image.asset(
+          widget.assetUrl, 
+          fit: BoxFit.cover),
       ),
     );
   }
