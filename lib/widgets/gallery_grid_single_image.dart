@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_gallery/app_themes.dart';
+import 'package:image_gallery/widgets/elastic_pull_wrapper.dart';
 import 'package:image_gallery/widgets/gallery_grid_data.dart';
 
 class GalleryGridSingleImage extends StatefulWidget {
@@ -21,6 +22,7 @@ class GalleryGridSingleImage extends StatefulWidget {
 
 class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
   double deltaTravelX = 0;
+  double deltaTravelY = 0;
   var _imageFit = BoxFit.contain;
 
   changeImageFit(BoxFit fit) {
@@ -33,45 +35,45 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
     Navigator.pop(context);
   }
 
-  onHorizontalDragUpdate(DragUpdateDetails d) {
-    double deltaX = d.delta.dx;
-    deltaTravelX += deltaX;
-    // If accumulated deltaX reached 100+
-    // This is a swipe-right
-    if (deltaTravelX > 100) {
-      // Check if next image exists
-      if (widget.galleryGridData.checkIndex(widget.gridIndex - 1)) {
-        // Get MaterialPageRoute from Grid Data
-        Navigator.pushReplacement(
+  void swipeRanged(int index, int range) {
+    bool exists = widget.galleryGridData.checkIndex(index + range);
+    if (exists) {
+      Navigator.pushReplacement(
+        context,
+        widget.galleryGridData.getAltRouteForIndex(
           context,
-          widget.galleryGridData.getAltRouteForIndex(
-            context,
-            widget.gridIndex - 1,
-            widget.gridIndex
-          ),
-        );
-      }
-    }
-    // If accumulated deltaX reached 100+
-    // This is a swipe-left
-    else if (deltaTravelX < -100) {
-      // Check if next image exists
-      if (widget.galleryGridData.checkIndex(widget.gridIndex + 1)) {
-        // Get MaterialPageRoute from Grid Data
-        Navigator.pushReplacement(
-          context,
-          widget.galleryGridData.getAltRouteForIndex(
-            context,
-            widget.gridIndex + 1,
-            widget.gridIndex
-          ),
-        );
-      }
+          index + range,
+          index,
+        ),
+      );
     }
   }
 
-  onHorizontalDragEnd(DragEndDetails d) {
-    deltaTravelX = 0;
+  onPulledUp(BuildContext context) {}
+
+  onPulledDown(BuildContext context) {
+    Navigator.of(context).pop();
+  }
+
+  onPulledLeft(BuildContext context) {
+    swipeRanged(widget.gridIndex, 1);
+  }
+
+  onPulledRight(BuildContext context) {
+    swipeRanged(widget.gridIndex, -1);
+  }
+
+  onThresholdExceeded(Direction direction, BuildContext context) {
+    switch (direction) {
+      case Direction.up:
+        onPulledUp(context);
+      case Direction.down:
+        onPulledDown(context);
+      case Direction.left:
+        onPulledLeft(context);
+      case Direction.right:
+        onPulledRight(context);
+    }
   }
 
   @override
@@ -79,6 +81,7 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: darkMush,
+        title: Text(widget.assetUrl, overflow: TextOverflow.ellipsis),
         actions: [
           IconButton.filled(
             onPressed: changeImageFit(BoxFit.cover),
@@ -87,13 +90,14 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
         ],
       ),
       body: SafeArea(
-        child: GestureDetector(
-          onHorizontalDragUpdate: onHorizontalDragUpdate,
-          onHorizontalDragEnd: onHorizontalDragEnd,
-          child: SizedBox.expand(
+        child: SizedBox.expand(
+          child: ElasticPullWrapper(
+            maxOffset: 100,
+            deltaFactor: 0.2,
+            threshold: 30,
+            onThresholdExceeded: onThresholdExceeded,
             child: Stack(
               children: [
-                Container(color: Colors.red),
                 OverflowBox(
                   maxWidth: MediaQuery.sizeOf(context).width * 2,
                   maxHeight: MediaQuery.sizeOf(context).height * 2,
@@ -106,7 +110,13 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
                     ),
                   ),
                 ),
-                Center(child: Image.asset(widget.assetUrl, fit: _imageFit)),
+                Center(
+                  child: Image.asset(
+                    widget.assetUrl,
+                    fit: _imageFit,
+                    alignment: AlignmentGeometry.xy(-1.0, 0),
+                  ),
+                ),
               ],
             ),
           ),
