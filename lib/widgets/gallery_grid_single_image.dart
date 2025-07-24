@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -5,7 +6,6 @@ import 'package:image_gallery/app_themes.dart';
 import 'package:image_gallery/widgets/elastic_pull_wrapper.dart';
 import 'package:image_gallery/widgets/gallery_grid_data.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
 
 class GalleryGridSingleImage extends StatefulWidget {
   final int gridIndex;
@@ -24,13 +24,13 @@ class GalleryGridSingleImage extends StatefulWidget {
 }
 
 class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
-  var _photoViewController = PhotoViewController();
-  var _imageFit = BoxFit.contain;
+  final _photoViewController = PhotoViewController();
+  final List<StreamSubscription> _subscriptions = [];
+  var _allowPageScrolling = true;
+  var _pageViewScrollPhysics = ScrollPhysics();
   var _appBarTitle = "";
 
-  toggleImageFit() {
-
-  }
+  toggleImageFit() {}
 
   close(BuildContext context) {
     Navigator.pop(context);
@@ -83,18 +83,51 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
 
   onPageChanged(int index) {
     setState(() {
-      _appBarTitle = widget.galleryGridData.getImageAt(index)?.assetUrl.toString() ?? "";
+      _appBarTitle =
+          widget.galleryGridData.getImageAt(index)?.assetUrl.toString() ?? "";
     });
+  }
+
+  addSubscription(StreamSubscription subscription) {
+    if (_subscriptions.contains(subscription)) {
+      int idx = _subscriptions.indexOf(subscription);
+      _subscriptions[idx].cancel();
+      _subscriptions.remove(subscription);
+    }
+    _subscriptions.add(subscription);
+  }
+
+  bool allowPageScrolling(double scale) {
+    log("_currentScale: $scale");
+    bool allow = scale == 1.0;
+    if (_allowPageScrolling != allow) {
+      _allowPageScrolling = allow;
+      setState(() {
+        if (allow) {
+          _pageViewScrollPhysics = PageScrollPhysics();
+        } else {
+          _pageViewScrollPhysics = NeverScrollableScrollPhysics();
+        }
+      });
+    }
+    return allow;
   }
 
   @override
   Widget build(BuildContext context) {
+    addSubscription(
+      _photoViewController.outputStateStream.listen((
+        PhotoViewControllerValue value,
+      ) {
+        allowPageScrolling(value.scale ?? 1.0);
+      }),
+    );
+    allowPageScrolling(_photoViewController.scale ?? 1.0);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: darkMush,
-        title: Text(
-          _appBarTitle,
-          overflow: TextOverflow.ellipsis),
+        title: Text(_appBarTitle, overflow: TextOverflow.ellipsis),
         actions: [
           IconButton.filled(
             onPressed: toggleImageFit,
@@ -104,6 +137,7 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
       ),
       body: SafeArea(
         child: PageView.builder(
+          physics: _pageViewScrollPhysics,
           onPageChanged: onPageChanged,
           itemCount: widget.galleryGridData.data.length,
           itemBuilder: (context, index) => SizedBox.expand(
@@ -111,7 +145,11 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
               child: Stack(
                 children: [
                   ImageFiltered(
-                    imageFilter: ImageFilter.blur(sigmaX: 64, sigmaY: 64, tileMode: TileMode.mirror),
+                    imageFilter: ImageFilter.blur(
+                      sigmaX: 64,
+                      sigmaY: 64,
+                      tileMode: TileMode.mirror,
+                    ),
                     child: Image.asset(
                       widget.galleryGridData.getImageAt(index)!.assetUrl,
                       height: double.maxFinite,
@@ -121,7 +159,7 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
                   Container(
                     decoration: BoxDecoration(
                       backgroundBlendMode: BlendMode.multiply,
-                      color: darkMush.withAlpha(128)
+                      color: darkMush.withAlpha(128),
                     ),
                   ),
                   Container(
@@ -161,5 +199,14 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    for (var subscription in _subscriptions) {
+      subscription.cancel();
+    }
+    _subscriptions.clear();
   }
 }
