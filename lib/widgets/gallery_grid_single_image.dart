@@ -81,6 +81,9 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
       ),
       body: SafeArea(
         child: PageView.builder(
+          controller: PageController(
+            initialPage: widget.galleryGridData.getIndexByUrl(widget.assetUrl)
+          ),
           onPageChanged: onPageChanged,
           itemCount: widget.galleryGridData.data.length,
           itemBuilder: (context, index) => SizedBox.expand(
