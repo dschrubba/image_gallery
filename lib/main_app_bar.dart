@@ -13,7 +13,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
     if (gridSize < 4) {
       gridSize ++;
     } else {
-      gridSize = 2;
+      gridSize = 1;
     }
     galleryGridCrossAxisCount.add(gridSize);
   }

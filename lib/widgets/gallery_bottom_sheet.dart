@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_gallery/app_themes.dart';
+import 'package:intl/intl.dart';
+
+DateFormat _dateFormatter = DateFormat("dd.MM.yyyy");
 
 class GalleryBottomSheet extends StatelessWidget {
+
   final String header;
   final String body;
   const GalleryBottomSheet({
@@ -43,12 +47,25 @@ class GalleryBottomSheet extends StatelessWidget {
                   children: [
                     Text(
                       header,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(
                         context,
-                      ).textTheme.headlineMedium!.copyWith(color: darkMush),
+                      ).textTheme.headlineMedium!.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: darkMush
+                        ),
                     ),
                     Text(
-                      "by Sharky Sharkson",
+                      "Shot by Sharky Sharkson",
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: textColor),
+                    ),
+                    Text(
+                      _dateFormatter.format(DateTime.now()),
+                      overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.left,
                       style: TextStyle(color: textColor),
                     ),
