@@ -1,21 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lorem/flutter_lorem.dart';
+import 'package:image_gallery/widgets/gallery_bottom_sheet.dart';
 import 'package:image_gallery/widgets/gallery_grid_single_image.dart';
 
 class GalleryGridData{
-
+  final BuildContext context;
   final String assetsPathPrefix;
   final List<GalleryGridImageData> _galleryGridImageData = [];
   List<GalleryGridImageData> get data  => _galleryGridImageData;
-
-  GalleryGridData({required List<String> assetUrls, required this.assetsPathPrefix}) {
+  GalleryGridData({required this.context, required List<String> assetUrls, required this.assetsPathPrefix}) {
     for (int i = 0; i < assetUrls.length; i++) {
       _galleryGridImageData.add(
         GalleryGridImageData(
           index: i,
-          assetUrl: "$assetsPathPrefix${assetUrls[i]}"
+          assetUrl: "$assetsPathPrefix${assetUrls[i]}",
+          bottomSheet: GalleryBottomSheet(
+            header: lorem(words: 2, paragraphs: 1),
+            body: lorem(words: 100, paragraphs: 2),
+          ),
         )
       );
     }
+  }
+  int getIndex(GalleryGridImageData galleryGridImageData) {
+    return _galleryGridImageData.indexWhere((GalleryGridImageData data) => data.assetUrl == galleryGridImageData.assetUrl);
+  }
+  int getIndexByUrl(String assetUrl) {
+    return _galleryGridImageData.indexWhere((GalleryGridImageData data) => data.assetUrl == assetUrl);
   }
   bool checkIndex(int index) {
     return (index >= 0) && (index < _galleryGridImageData.length);
@@ -41,7 +52,6 @@ class GalleryGridData{
   Route getAltRouteForIndex(BuildContext context, int index, int prevIndex) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => GalleryGridSingleImage(
-        gridIndex: index,
         assetUrl: _galleryGridImageData[index].assetUrl,
         galleryGridData: this,
       ),
@@ -58,10 +68,9 @@ class GalleryGridData{
       );
     });
   }
-  MaterialPageRoute getRouteForIndex(BuildContext context, int index) {
+  MaterialPageRoute<GalleryGridSingleImage> getRouteForIndex(BuildContext context, int index) {
     return MaterialPageRoute<GalleryGridSingleImage>(
       builder: (context) => GalleryGridSingleImage(
-        gridIndex: index,
         assetUrl: _galleryGridImageData[index].assetUrl,
         galleryGridData: this,
         )
@@ -70,7 +79,7 @@ class GalleryGridData{
   bool pushRouteForIndex(BuildContext context, int index) {
     bool exists = checkIndex(index);
     if (exists) {
-      MaterialPageRoute route = getRouteForIndex(context, index);
+      MaterialPageRoute<GalleryGridSingleImage> route = getRouteForIndex(context, index);
       Navigator.of(context).push(route);
     }
     return exists;
@@ -81,5 +90,6 @@ class GalleryGridData{
 class GalleryGridImageData{
   final int index;
   final String assetUrl;
-  const GalleryGridImageData({required this.index, required this.assetUrl});
+  final Widget bottomSheet;
+  const GalleryGridImageData({required this.index, required this.assetUrl, required this.bottomSheet});
 }

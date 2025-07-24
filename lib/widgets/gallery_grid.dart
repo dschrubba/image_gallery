@@ -17,10 +17,7 @@ class GalleryGrid extends StatefulWidget {
 class _GalleryGridState extends State<GalleryGrid> {
   final List<StreamSubscription> _subscriptions = [];
   int _crossAxis = 2;
-  GalleryGridData galleryGridData = GalleryGridData(
-    assetUrls: dummyImages,
-    assetsPathPrefix: "assets/images/"
-    );
+  late GalleryGridData _galleryGridData;
 
   void setCrossAxisCount(int count) {
     log("setCrossAxisCount:$count");
@@ -32,6 +29,11 @@ class _GalleryGridState extends State<GalleryGrid> {
   @override
   void initState() {
     super.initState();
+    _galleryGridData = GalleryGridData(
+      context: context,
+      assetUrls: dummyImages,
+      assetsPathPrefix: "assets/images/"
+    );
     _subscriptions.add(galleryGridCrossAxisCount.listen((int value) => setCrossAxisCount(value)));
   }
 
@@ -43,12 +45,12 @@ class _GalleryGridState extends State<GalleryGrid> {
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
       crossAxisCount: _crossAxis,
-      children: [for (int index = 0; index < galleryGridData.data.length; index++) 
-        if (galleryGridData.getImageAtOrNull(index) != null)
+      children: [for (int index = 0; index < _galleryGridData.data.length; index++) 
+        if (_galleryGridData.getImageAtOrNull(index) != null)
           GalleryGridImage(
             gridIndex: index,
-            assetUrl: galleryGridData.getImageAt(index)!.assetUrl,
-            galleryGridData: galleryGridData,
+            assetUrl: _galleryGridData.getImageAt(index)!.assetUrl,
+            galleryGridData: _galleryGridData,
           )
       ],
     );
