@@ -73,10 +73,10 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
         backgroundColor: darkMush,
         title: Text(_appBarTitle, overflow: TextOverflow.ellipsis),
         actions: [
-          IconButton.filled(
+          /*IconButton.filled(
             onPressed: toggleImageFit,
             icon: Icon(Icons.fullscreen),
-          ),
+          ),*/
         ],
       ),
       body: SafeArea(

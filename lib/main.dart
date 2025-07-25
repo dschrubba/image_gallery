@@ -25,7 +25,7 @@ class AppHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'FLAXCOM',
+      title: 'Image Gallery',
       theme: AppThemes.light,
       darkTheme: AppThemes.dark,
       home: Scaffold(
