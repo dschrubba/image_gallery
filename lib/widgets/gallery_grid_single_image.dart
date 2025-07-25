@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_gallery/app_themes.dart';
@@ -52,11 +53,12 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
     setAppBarTitle(index);
   }
 
-  bool _infoIconVisible = false;
+  double _infoIconOpacity = 1;
   void onTap() {
+    log("onTap reached!");
     // Toggle info icon visibility
     setState(() {
-      _infoIconVisible = !_infoIconVisible;
+      _infoIconOpacity = _infoIconOpacity > 0 ? 0 : 1;
     });
   }
 
@@ -82,35 +84,35 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
       body: SafeArea(
         child: PageView.builder(
           controller: PageController(
-            initialPage: widget.galleryGridData.getIndexByUrl(widget.assetUrl)
+            initialPage: widget.galleryGridData.getIndexByUrl(widget.assetUrl),
           ),
           onPageChanged: onPageChanged,
           itemCount: widget.galleryGridData.data.length,
           itemBuilder: (context, index) => SizedBox.expand(
-            child: GestureDetector(
-              onTap: onTap,
-              child: ClipRect(
-                child: Stack(
-                  children: [
-                    ImageFiltered(
-                      imageFilter: ImageFilter.blur(
-                        sigmaX: 64,
-                        sigmaY: 64,
-                        tileMode: TileMode.mirror,
-                      ),
-                      child: Image.asset(
-                        widget.galleryGridData.getImageAt(index)!.assetUrl,
-                        height: double.maxFinite,
-                        fit: BoxFit.cover,
-                      ),
+            child: ClipRect(
+              child: Stack(
+                children: [
+                  ImageFiltered(
+                    imageFilter: ImageFilter.blur(
+                      sigmaX: 64,
+                      sigmaY: 64,
+                      tileMode: TileMode.mirror,
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        backgroundBlendMode: BlendMode.multiply,
-                        color: darkMush.withAlpha(128),
-                      ),
+                    child: Image.asset(
+                      widget.galleryGridData.getImageAt(index)!.assetUrl,
+                      height: double.maxFinite,
+                      fit: BoxFit.cover,
                     ),
-                    Container(
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      backgroundBlendMode: BlendMode.multiply,
+                      color: darkMush.withAlpha(128),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: onTap,
+                    child: Container(
                       alignment: AlignmentGeometry.directional(0, 0),
                       child: PhotoView(
                         minScale: 1.0,
@@ -123,30 +125,31 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
                         ).image,
                       ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Padding(
-                          padding: EdgeInsetsGeometry.all(8),
-                          child: IconButton(
-                            iconSize: 32,
-                            icon: Icon(Icons.info_outline),
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (context) {
-                                  return widget.galleryGridData
-                                      .getImageAt(index)!
-                                      .bottomSheet;
-                                },
-                              );
-                            },
-                          ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      AnimatedOpacity(opacity: _infoIconOpacity, duration: Duration(milliseconds: 250), child: 
+                      Padding(
+                        padding: EdgeInsetsGeometry.all(8),
+                        child: IconButton(
+                          iconSize: 32,
+                          icon: Icon(Icons.info_outline),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return widget.galleryGridData
+                                    .getImageAt(index)!
+                                    .bottomSheet;
+                              },
+                            );
+                          },
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      )),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
