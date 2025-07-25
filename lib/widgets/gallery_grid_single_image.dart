@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -21,6 +22,11 @@ class GalleryGridSingleImage extends StatefulWidget {
 
 class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
   var _appBarTitle = "";
+  final _scaleStateController = PhotoViewScaleStateController();
+  late PageController? _pageController;
+  StreamSubscription? _scaleStateControllerSubscription;
+  ScrollPhysics _pageScrollPhysics = PageScrollPhysics();
+  bool _allowPageViewScroll = true;
 
   toggleImageFit() {}
 
@@ -65,7 +71,30 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: widget.galleryGridData.getIndexByUrl(widget.assetUrl));
     setAppBarTitle(widget.galleryGridData.getIndexByUrl(widget.assetUrl));
+    
+    _scaleStateControllerSubscription ??= _scaleStateController.outputScaleStateStream.listen((PhotoViewScaleState scaleState) {
+        _allowPageViewScroll = !scaleState.isScaleStateZooming;
+        setState(() {
+        if (_allowPageViewScroll) {
+          _pageScrollPhysics = PageScrollPhysics();
+        } else {
+          _pageScrollPhysics = NeverScrollableScrollPhysics();
+        }
+        });
+
+      });
+
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if (_scaleStateControllerSubscription != null) {
+      _scaleStateControllerSubscription!.cancel();
+      _scaleStateControllerSubscription = null;
+    }
   }
 
   @override
@@ -83,9 +112,8 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
       ),
       body: SafeArea(
         child: PageView.builder(
-          controller: PageController(
-            initialPage: widget.galleryGridData.getIndexByUrl(widget.assetUrl),
-          ),
+          physics: _pageScrollPhysics,
+          controller: _pageController,
           onPageChanged: onPageChanged,
           itemCount: widget.galleryGridData.data.length,
           itemBuilder: (context, index) => SizedBox.expand(
@@ -114,9 +142,11 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
                     onTap: onTap,
                     child: Container(
                       alignment: AlignmentGeometry.directional(0, 0),
+                      // IMAGE DISPLAY
                       child: PhotoView(
                         minScale: 1.0,
                         maxScale: 4.0,
+                        scaleStateController: _scaleStateController,
                         backgroundDecoration: BoxDecoration(
                           color: Colors.transparent,
                         ),
