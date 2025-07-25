@@ -20,7 +20,6 @@ class _GalleryGridState extends State<GalleryGrid> {
   late GalleryGridData _galleryGridData;
 
   void setCrossAxisCount(int count) {
-    log("setCrossAxisCount:$count");
     setState(() {
       _crossAxis = count;
     });

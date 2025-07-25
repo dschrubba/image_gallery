@@ -61,7 +61,6 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
 
   double _infoIconOpacity = 1;
   void onTap() {
-    log("onTap reached!");
     // Toggle info icon visibility
     setState(() {
       _infoIconOpacity = _infoIconOpacity > 0 ? 0 : 1;
