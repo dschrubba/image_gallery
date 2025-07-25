@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:image_gallery/app_settings.dart';
 import 'package:image_gallery/images_list.dart';
-import 'package:image_gallery/main_events.dart';
 import 'package:image_gallery/widgets/gallery_grid_image.dart';
 import 'package:image_gallery/widgets/gallery_grid_data.dart';
 
@@ -16,7 +16,7 @@ class GalleryGrid extends StatefulWidget {
 
 class _GalleryGridState extends State<GalleryGrid> {
   final List<StreamSubscription> _subscriptions = [];
-  int _crossAxis = 2;
+  int _crossAxis = AppSettings.galleryGridCrossAxisCount.value;
   late GalleryGridData _galleryGridData;
 
   void setCrossAxisCount(int count) {
@@ -34,7 +34,7 @@ class _GalleryGridState extends State<GalleryGrid> {
       assetUrls: dummyImages,
       assetsPathPrefix: "assets/images/"
     );
-    _subscriptions.add(galleryGridCrossAxisCount.listen((int value) => setCrossAxisCount(value)));
+    _subscriptions.add(AppSettings.galleryGridCrossAxisCount.listen((int value) => setCrossAxisCount(value)));
   }
 
   @override
