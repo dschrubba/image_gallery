@@ -136,6 +136,9 @@ class _GalleryGridSingleImageState extends State<GalleryGridSingleImage> {
                           iconSize: 32,
                           icon: Icon(Icons.info_outline),
                           onPressed: () {
+                            if (_infoIconOpacity < 0.01) {
+                              return;
+                            }
                             showModalBottomSheet(
                               context: context,
                               builder: (context) {
